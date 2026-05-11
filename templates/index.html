@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBIR — Búsqueda Visualpor Similitud</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="bg-grid"></div>
+
+<header class="site-header">
+    <div class="header-inner">
+        <div class="header-logo">
+            <span class="logo-icon"><i class="ti ti-eye-scan"></i></span>
+            <span class="logo-text">CBIR<span class="logo-dot">.</span></span>
+        </div>
+        <nav class="header-nav">
+            <span class="nav-tag">Proyecto de Investigación</span>
+        </nav>
+    </div>
+</header>
+
+<section class="hero-section">
+    <div class="hero-label">SISTEMA DE RECUPERACIÓN DE IMÁGENES</div>
+    <h1 class="hero-title">
+        Búsqueda Visual<br>
+        <span class="hero-title-accent">por Similitud</span>
+    </h1>
+    <p class="hero-subtitle">
+        Optimización del aprendizaje en consultas por similitud de imágenes<br>
+        usando algoritmos de distancia vectorial
+    </p>
+    <div class="stat-bar">
+        <div class="stat-pill">
+            <i class="ti ti-photo"></i>
+            <span>{{ total }}</span> imágenes en dataset
+        </div>
+        <div class="stat-pill">
+            <i class="ti ti-cpu"></i>
+            Descriptor ORB + Histograma
+        </div>
+        <div class="stat-pill">
+            <i class="ti ti-vector"></i>
+            3 métricas de distancia
+        </div>
+    </div>
+</section>
+
+<main class="main-wrapper">
+    <div class="search-card">
+
+        <div class="card-header-custom">
+            <div class="card-header-left">
+                <h2 class="card-title">Consulta de imagen</h2>
+                <p class="card-subtitle">Sube una imagen para encontrar las más similares en el dataset</p>
+            </div>
+            <div class="card-step-badge">01</div>
+        </div>
+
+        <form action="/buscar" method="POST" enctype="multipart/form-data" id="searchForm">
+
+            <div class="upload-zone" id="uploadZone">
+                <input type="file" name="imagen" id="fileInput" accept="image/*" required class="file-input-hidden">
+                <div class="upload-placeholder" id="uploadPlaceholder">
+                    <div class="upload-icon-wrap">
+                        <i class="ti ti-cloud-upload"></i>
+                    </div>
+                    <p class="upload-main-text">Arrastra una imagen aquí</p>
+                    <p class="upload-sub-text">o <span class="upload-link">haz clic para seleccionar</span></p>
+                    <p class="upload-formats">JPG · PNG · BMP · WEBP</p>
+                </div>
+                <div class="preview-wrap" id="previewWrap" style="display:none;">
+                    <img id="preview" alt="Preview">
+                    <button type="button" class="preview-remove" id="removeBtn">
+                        <i class="ti ti-x"></i>
+                    </button>
+                    <div class="preview-filename" id="previewFilename"></div>
+                </div>
+            </div>
+
+            <div class="method-section">
+                <div class="method-section-header">
+                    <span class="step-tag">02</span>
+                    <h3 class="method-title">Algoritmo de distancia</h3>
+                </div>
+                <div class="method-grid">
+
+                    <label class="method-card" for="coseno">
+                        <input type="radio" name="metodo" id="coseno" value="coseno" checked class="method-radio">
+                        <div class="method-card-inner">
+                            <div class="method-icon"><i class="ti ti-angle"></i></div>
+                            <div class="method-info">
+                                <span class="method-name">Similitud Coseno</span>
+                                <span class="method-desc">Mide el ángulo entre vectores. Ideal para descriptores normalizados.</span>
+                            </div>
+                            <div class="method-check"><i class="ti ti-check"></i></div>
+                        </div>
+                    </label>
+
+                    <label class="method-card" for="euclidiana">
+                        <input type="radio" name="metodo" id="euclidiana" value="euclidiana" class="method-radio">
+                        <div class="method-card-inner">
+                            <div class="method-icon"><i class="ti ti-ruler-measure"></i></div>
+                            <div class="method-info">
+                                <span class="method-name">Distancia Euclidiana</span>
+                                <span class="method-desc">Distancia geométrica en el espacio vectorial de características.</span>
+                            </div>
+                            <div class="method-check"><i class="ti ti-check"></i></div>
+                        </div>
+                    </label>
+
+                    <label class="method-card" for="manhattan">
+                        <input type="radio" name="metodo" id="manhattan" value="manhattan" class="method-radio">
+                        <div class="method-card-inner">
+                            <div class="method-icon"><i class="ti ti-grid-4x4"></i></div>
+                            <div class="method-info">
+                                <span class="method-name">Distancia Manhattan</span>
+                                <span class="method-desc">Suma de diferencias absolutas. Robusta ante valores atípicos.</span>
+                            </div>
+                            <div class="method-check"><i class="ti ti-check"></i></div>
+                        </div>
+                    </label>
+
+                </div>
+            </div>
+
+            <div class="submit-section">
+                <button type="submit" class="btn-search" id="submitBtn">
+                    <span class="btn-search-text">
+                        <i class="ti ti-search"></i>
+                        Buscar imágenes similares
+                    </span>
+                    <span class="btn-search-loading" style="display:none;">
+                        <i class="ti ti-loader-2 spin"></i>
+                        Procesando...
+                    </span>
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+    <div class="tech-info">
+        <div class="tech-info-item">
+            <i class="ti ti-info-circle"></i>
+            <span>Descriptor combinado: Histograma RGB (8×8×8) + ORB (500 keypoints)</span>
+        </div>
+        <div class="tech-info-item">
+            <i class="ti ti-info-circle"></i>
+            <span>Se retornan las 6 imágenes más similares del dataset de entrenamiento</span>
+        </div>
+    </div>
+</main>
+
+<footer class="site-footer">
+    <p>Optimización del aprendizaje en consultas por similitud de imágenes usando algoritmos de distancia vectorial</p>
+</footer>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
